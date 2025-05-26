@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 120" stroke="#222" fill="none" stroke-width="2">
+  <!-- Cabeças -->
+  <circle cx="60" cy="40" r="16"/>
+  <circle cx="140" cy="40" r="16"/>
+  <!-- Corpo homem -->
+  <path d="M60 56 Q55 80 60 100"/>
+  <path d="M60 56 Q65 80 60 100"/>
+  <!-- Corpo mulher (com saia) -->
+  <path d="M140 56 Q135 80 140 100"/>
+  <path d="M140 56 Q145 80 140 100"/>
+  <path d="M140 56 Q150 80 160 100"/>
+  <path d="M140 56 Q130 80 120 100"/>
+  <!-- Braços e mãos dadas -->
+  <path d="M76 56 Q90 70 110 70"/>
+  <path d="M124 56 Q110 70 110 70"/>
+  <!-- Braço esquerdo homem (com bengala) -->
+  <path d="M44 56 Q30 80 40 100"/>
+  <path d="M40 100 Q38 110 48 110"/>
+  <!-- Braço direito mulher -->
+  <path d="M156 56 Q170 80 160 100"/>
+  <!-- Cabelo homem (calvície) -->
+  <path d="M52 32 Q60 24 68 32"/>
+  <!-- Cabelo mulher (coque) -->
+  <ellipse cx="150" cy="28" rx="6" ry="8"/>
+</svg>

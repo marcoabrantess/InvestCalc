@@ -15,7 +15,7 @@ export const metadata = {
         images: ['/images/logo-og.png'], // Substitua pelo caminho da sua imagem de logo para o Open Graph
     },
     icons: {
-        icon: '/images/invest-calc-icon.svg', // Favicon
+        icon: '/icons/invest-calc-icon.svg', // Favicon
     },
     robots: {
         index: true,

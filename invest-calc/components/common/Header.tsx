@@ -9,7 +9,7 @@ export default function Header() {
                 <Link href="/" className="flex items-center gap-2">
                     <span className="text-primary">
                         <Image
-                            src="/images/calculator.svg"
+                            src="/icons/calculator.svg"
                             alt="Ícone de Calculadora"
                             width={28}
                             height={28}
