@@ -1,26 +1,27 @@
 'use client';
 
 import { useState } from 'react';
-import { retirementSchema } from '@/lib/validation/retirementSchema';
-import { calculateRetirement } from '@/lib/calculations/retirement';
-import { RetirementFormData } from '@/types/retirement';
+import { rentOrBuySchema } from '@/utils/validation/rentOrBuySchema';
+import { calculateRentOrBuy } from '@/utils/calculations/rentOrBuy';
+import { RentOrBuyFormData } from '@/types/rentOrBuy';
 
-const initialValues: RetirementFormData = {
-    monthlyIncome: 5000,
-    currentInvestment: 50000,
-    retirementGoal: 1000000,
-    investPercent: 20,
-    currentAge: 30,
-    retirementAge: 65,
-    annualReturn: 10,
-    monthlyExpense: 10000,
+const initialValues: RentOrBuyFormData = {
+    propertyValue: 500000,
+    rentValue: 2000,
+    appreciation: 4,
+    igpm: 8.63,
+    downPayment: 100000,
+    financingCosts: 15000,
+    term: 360,
+    interestRate: 7,
+    investmentReturn: 11,
 };
 
-export default function RetirementForm() {
+export default function RentOrBuyForm() {
     const [form, setForm] = useState(initialValues);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [result, setResult] = useState<null | ReturnType<
-        typeof calculateRetirement
+        typeof calculateRentOrBuy
     >>(null);
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -34,7 +35,7 @@ export default function RetirementForm() {
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setErrors({});
-        const parsed = retirementSchema.safeParse(form);
+        const parsed = rentOrBuySchema.safeParse(form);
         if (!parsed.success) {
             const fieldErrors: Record<string, string> = {};
             parsed.error.errors.forEach((err) => {
@@ -45,7 +46,7 @@ export default function RetirementForm() {
             setResult(null);
             return;
         }
-        setResult(calculateRetirement(form));
+        setResult(calculateRentOrBuy(form));
     }
 
     return (
@@ -54,190 +55,204 @@ export default function RetirementForm() {
             className="bg-white rounded-xl shadow-card p-8 flex flex-col gap-4 max-w-2xl mx-auto"
         >
             <h2 className="text-2xl font-bold text-primary mb-4">
-                Simulador de Aposentadoria
+                Alugar ou Financiar um Imóvel?
             </h2>
             <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-                {/* Linha 1 */}
                 <div>
-                    <label className="font-medium">
-                        Quanto você ganha por mês?
-                    </label>
+                    <label className="font-medium">Valor do imóvel (R$)</label>
                 </div>
                 <div>
-                    <label className="font-medium">
-                        Quanto você já tem investido?
-                    </label>
+                    <label className="font-medium">Valor do aluguel (R$)</label>
                 </div>
                 <div>
                     <input
                         type="number"
-                        name="monthlyIncome"
-                        value={form.monthlyIncome}
+                        name="propertyValue"
+                        value={form.propertyValue}
                         onChange={handleChange}
                         className="input"
                         min={0}
                         required
                     />
-                    {errors.monthlyIncome && (
+                    {errors.propertyValue && (
                         <span className="text-red-600 text-sm">
-                            {errors.monthlyIncome}
+                            {errors.propertyValue}
                         </span>
                     )}
                 </div>
                 <div>
                     <input
                         type="number"
-                        name="currentInvestment"
-                        value={form.currentInvestment}
+                        name="rentValue"
+                        value={form.rentValue}
                         onChange={handleChange}
                         className="input"
                         min={0}
                         required
                     />
-                    {errors.currentInvestment && (
+                    {errors.rentValue && (
                         <span className="text-red-600 text-sm">
-                            {errors.currentInvestment}
+                            {errors.rentValue}
                         </span>
                     )}
                 </div>
-                {/* Linha 2 */}
+
                 <div>
-                    <label className="font-medium">
-                        Com quanto de patrimônio você quer se aposentar?
-                    </label>
+                    <label className="font-medium">Valorização anual (%)</label>
                 </div>
                 <div>
-                    <label className="font-medium">
-                        Quantos % da sua renda que você investe?
-                    </label>
+                    <label className="font-medium">IGPM anual (%)</label>
                 </div>
                 <div>
                     <input
                         type="number"
-                        name="retirementGoal"
-                        value={form.retirementGoal}
-                        onChange={handleChange}
-                        className="input"
-                        min={0}
-                        required
-                    />
-                    {errors.retirementGoal && (
-                        <span className="text-red-600 text-sm">
-                            {errors.retirementGoal}
-                        </span>
-                    )}
-                </div>
-                <div>
-                    <input
-                        type="number"
-                        name="investPercent"
-                        value={form.investPercent}
+                        name="appreciation"
+                        value={form.appreciation}
                         onChange={handleChange}
                         className="input"
                         min={0}
                         max={100}
+                        step="0.01"
                         required
                     />
-                    {errors.investPercent && (
+                    {errors.appreciation && (
                         <span className="text-red-600 text-sm">
-                            {errors.investPercent}
-                        </span>
-                    )}
-                </div>
-                {/* Linha 3 */}
-                <div>
-                    <label className="font-medium">Qual sua idade atual?</label>
-                </div>
-                <div>
-                    <label className="font-medium">
-                        Com quantos anos você deseja se aposentar?
-                    </label>
-                </div>
-                <div>
-                    <input
-                        type="number"
-                        name="currentAge"
-                        value={form.currentAge}
-                        onChange={handleChange}
-                        className="input"
-                        min={0}
-                        max={120}
-                        required
-                    />
-                    {errors.currentAge && (
-                        <span className="text-red-600 text-sm">
-                            {errors.currentAge}
+                            {errors.appreciation}
                         </span>
                     )}
                 </div>
                 <div>
                     <input
                         type="number"
-                        name="retirementAge"
-                        value={form.retirementAge}
-                        onChange={handleChange}
-                        className="input"
-                        min={form.currentAge + 1}
-                        max={120}
-                        required
-                    />
-                    {errors.retirementAge && (
-                        <span className="text-red-600 text-sm">
-                            {errors.retirementAge}
-                        </span>
-                    )}
-                </div>
-                {/* Linha 4 */}
-                <div>
-                    <label className="font-medium">
-                        Sua rentabilidade total anual projetada (%)
-                    </label>
-                </div>
-                <div>
-                    <label className="font-medium">
-                        Quanto você pretende gastar por mês aposentado?
-                    </label>
-                </div>
-                <div>
-                    <input
-                        type="number"
-                        name="annualReturn"
-                        value={form.annualReturn}
+                        name="igpm"
+                        value={form.igpm}
                         onChange={handleChange}
                         className="input"
                         min={0}
                         max={100}
-                        step="0.1"
+                        step="0.01"
                         required
                     />
-                    {errors.annualReturn && (
+                    {errors.igpm && (
                         <span className="text-red-600 text-sm">
-                            {errors.annualReturn}
+                            {errors.igpm}
+                        </span>
+                    )}
+                </div>
+
+                <div>
+                    <label className="font-medium">Entrada (R$)</label>
+                </div>
+                <div>
+                    <label className="font-medium">
+                        Custos do financiamento (R$)
+                    </label>
+                </div>
+                <div>
+                    <input
+                        type="number"
+                        name="downPayment"
+                        value={form.downPayment}
+                        onChange={handleChange}
+                        className="input"
+                        min={0}
+                        required
+                    />
+                    {errors.downPayment && (
+                        <span className="text-red-600 text-sm">
+                            {errors.downPayment}
                         </span>
                     )}
                 </div>
                 <div>
                     <input
                         type="number"
-                        name="monthlyExpense"
-                        value={form.monthlyExpense}
+                        name="financingCosts"
+                        value={form.financingCosts}
                         onChange={handleChange}
                         className="input"
                         min={0}
                         required
                     />
-                    {errors.monthlyExpense && (
+                    {errors.financingCosts && (
                         <span className="text-red-600 text-sm">
-                            {errors.monthlyExpense}
+                            {errors.financingCosts}
                         </span>
                     )}
                 </div>
+
+                <div>
+                    <label className="font-medium">Prazo (meses)</label>
+                </div>
+                <div>
+                    <label className="font-medium">Taxa anual (%)</label>
+                </div>
+                <div>
+                    <input
+                        type="number"
+                        name="term"
+                        value={form.term}
+                        onChange={handleChange}
+                        className="input"
+                        min={1}
+                        required
+                    />
+                    {errors.term && (
+                        <span className="text-red-600 text-sm">
+                            {errors.term}
+                        </span>
+                    )}
+                </div>
+                <div>
+                    <input
+                        type="number"
+                        name="interestRate"
+                        value={form.interestRate}
+                        onChange={handleChange}
+                        className="input"
+                        min={0}
+                        max={100}
+                        step="0.01"
+                        required
+                    />
+                    {errors.interestRate && (
+                        <span className="text-red-600 text-sm">
+                            {errors.interestRate}
+                        </span>
+                    )}
+                </div>
+
+                <div>
+                    <label className="font-medium">
+                        Rentabilidade anual (%)
+                    </label>
+                </div>
+                <div></div>
+                <div>
+                    <input
+                        type="number"
+                        name="investmentReturn"
+                        value={form.investmentReturn}
+                        onChange={handleChange}
+                        className="input"
+                        min={0}
+                        max={100}
+                        step="0.01"
+                        required
+                    />
+                    {errors.investmentReturn && (
+                        <span className="text-red-600 text-sm">
+                            {errors.investmentReturn}
+                        </span>
+                    )}
+                </div>
+                <div></div>
             </div>
             <button
                 type="submit"
                 className="bg-primary hover:bg-secondary text-white font-semibold py-2 px-6 rounded-lg transition-colors mt-4"
             >
-                Simular
+                Calcular
             </button>
 
             {result && (
@@ -246,36 +261,44 @@ export default function RetirementForm() {
                         Resultado
                     </h2>
                     <p>
-                        Em <b>{result.years}</b> anos, você terá acumulado
-                        aproximadamente{' '}
+                        Prestação mensal:{' '}
                         <b>
                             R${' '}
-                            {result.futureValue.toLocaleString('pt-BR', {
+                            {result.monthlyPayment.toLocaleString('pt-BR', {
                                 minimumFractionDigits: 2,
                             })}
                         </b>
-                        .
                     </p>
-                    {result.reachedGoal ? (
-                        <p className="text-green-600 font-semibold mt-2">
-                            Parabéns! Você atingirá seu objetivo de
-                            aposentadoria.
-                        </p>
-                    ) : (
-                        <p className="text-red-600 font-semibold mt-2">
-                            Com os parâmetros atuais, você não atingirá o
-                            objetivo de R${' '}
-                            {form.retirementGoal.toLocaleString('pt-BR', {
+                    <p>
+                        Valor do imóvel ao final:{' '}
+                        <b>
+                            R${' '}
+                            {result.finalPropertyValue.toLocaleString('pt-BR', {
                                 minimumFractionDigits: 2,
                             })}
-                            . Considere aumentar o percentual investido, o tempo
-                            de acumulação ou a rentabilidade.
-                        </p>
-                    )}
-                    <p className="mt-4 text-gray-600 text-sm">
-                        Seu patrimônio sustentaria{' '}
-                        <b>{result.sustainabilityYears} anos</b> de
-                        aposentadoria com o gasto mensal informado.
+                        </b>
+                    </p>
+                    <p>
+                        Valor investido ao final:{' '}
+                        <b>
+                            R${' '}
+                            {result.invested.toLocaleString('pt-BR', {
+                                minimumFractionDigits: 2,
+                            })}
+                        </b>
+                    </p>
+                    <p className="mt-4 text-lg font-semibold">
+                        <span
+                            className={
+                                result.recommendation === 'Alugar'
+                                    ? 'text-green-600'
+                                    : 'text-blue-600'
+                            }
+                        >
+                            {result.recommendation === 'Alugar'
+                                ? 'Alugar é mais vantajoso.'
+                                : 'Financiar é mais vantajoso.'}
+                        </span>
                     </p>
                 </div>
             )}

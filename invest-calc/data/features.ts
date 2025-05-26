@@ -13,7 +13,7 @@ export const investmentFeatures: Feature[] = [
         title: 'Aluguel x Financiamento',
         description:
             'Compare cenários e descubra qual opção faz mais sentido para você.',
-        href: '/aluguel-vs-financiamento',
+        href: '/rent-vs-finance',
         icon: '/icons/building-icon.svg',
         button: 'Comparar Opções',
     },
