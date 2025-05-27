@@ -70,7 +70,7 @@ export default function RentOrBuyForm() {
                         name="propertyValue"
                         value={form.propertyValue}
                         onChange={handleChange}
-                        className="input"
+                        className="input w-full"
                         min={0}
                         required
                     />
@@ -86,7 +86,7 @@ export default function RentOrBuyForm() {
                         name="rentValue"
                         value={form.rentValue}
                         onChange={handleChange}
-                        className="input"
+                        className="input w-full"
                         min={0}
                         required
                     />
@@ -109,7 +109,7 @@ export default function RentOrBuyForm() {
                         name="appreciation"
                         value={form.appreciation}
                         onChange={handleChange}
-                        className="input"
+                        className="input w-full"
                         min={0}
                         max={100}
                         step="0.01"
@@ -127,7 +127,7 @@ export default function RentOrBuyForm() {
                         name="igpm"
                         value={form.igpm}
                         onChange={handleChange}
-                        className="input"
+                        className="input w-full"
                         min={0}
                         max={100}
                         step="0.01"
@@ -154,7 +154,7 @@ export default function RentOrBuyForm() {
                         name="downPayment"
                         value={form.downPayment}
                         onChange={handleChange}
-                        className="input"
+                        className="input w-full"
                         min={0}
                         required
                     />
@@ -170,7 +170,7 @@ export default function RentOrBuyForm() {
                         name="financingCosts"
                         value={form.financingCosts}
                         onChange={handleChange}
-                        className="input"
+                        className="input w-full"
                         min={0}
                         required
                     />
@@ -193,7 +193,7 @@ export default function RentOrBuyForm() {
                         name="term"
                         value={form.term}
                         onChange={handleChange}
-                        className="input"
+                        className="input w-full"
                         min={1}
                         required
                     />
@@ -209,7 +209,7 @@ export default function RentOrBuyForm() {
                         name="interestRate"
                         value={form.interestRate}
                         onChange={handleChange}
-                        className="input"
+                        className="input w-full"
                         min={0}
                         max={100}
                         step="0.01"
@@ -234,7 +234,7 @@ export default function RentOrBuyForm() {
                         name="investmentReturn"
                         value={form.investmentReturn}
                         onChange={handleChange}
-                        className="input"
+                        className="input w-full"
                         min={0}
                         max={100}
                         step="0.01"

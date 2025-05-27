@@ -74,7 +74,7 @@ export default function RetirementForm() {
                         name="monthlyIncome"
                         value={form.monthlyIncome}
                         onChange={handleChange}
-                        className="input"
+                        className="input w-full"
                         min={0}
                         required
                     />
@@ -90,7 +90,7 @@ export default function RetirementForm() {
                         name="currentInvestment"
                         value={form.currentInvestment}
                         onChange={handleChange}
-                        className="input"
+                        className="input w-full"
                         min={0}
                         required
                     />
@@ -117,7 +117,7 @@ export default function RetirementForm() {
                         name="retirementGoal"
                         value={form.retirementGoal}
                         onChange={handleChange}
-                        className="input"
+                        className="input w-full"
                         min={0}
                         required
                     />
@@ -133,7 +133,7 @@ export default function RetirementForm() {
                         name="investPercent"
                         value={form.investPercent}
                         onChange={handleChange}
-                        className="input"
+                        className="input w-full"
                         min={0}
                         max={100}
                         required
@@ -159,7 +159,7 @@ export default function RetirementForm() {
                         name="currentAge"
                         value={form.currentAge}
                         onChange={handleChange}
-                        className="input"
+                        className="input w-full"
                         min={0}
                         max={120}
                         required
@@ -176,7 +176,7 @@ export default function RetirementForm() {
                         name="retirementAge"
                         value={form.retirementAge}
                         onChange={handleChange}
-                        className="input"
+                        className="input w-full"
                         min={form.currentAge + 1}
                         max={120}
                         required
@@ -204,7 +204,7 @@ export default function RetirementForm() {
                         name="annualReturn"
                         value={form.annualReturn}
                         onChange={handleChange}
-                        className="input"
+                        className="input w-full"
                         min={0}
                         max={100}
                         step="0.1"
@@ -222,7 +222,7 @@ export default function RetirementForm() {
                         name="monthlyExpense"
                         value={form.monthlyExpense}
                         onChange={handleChange}
-                        className="input"
+                        className="input w-full"
                         min={0}
                         required
                     />
