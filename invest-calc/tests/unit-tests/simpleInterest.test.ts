@@ -1,4 +1,3 @@
-// tests/features/simpleInterest.test.ts
 import { calculateSimpleInterest } from '@/utils/calculations/simpleInterest';
 import { SimpleInterestFormData } from '@/types/simpleInterest';
 

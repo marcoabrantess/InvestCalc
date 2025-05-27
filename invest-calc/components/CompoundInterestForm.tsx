@@ -147,13 +147,16 @@ export default function CompoundInterestForm() {
             </button>
 
             {result && (
-                <div className="mt-8 bg-gray-50 rounded-xl p-6 shadow-inner text-center">
+                <div
+                    className="mt-8 bg-gray-50 rounded-xl p-6 shadow-inner text-center"
+                    data-testid="result-card"
+                >
                     <h2 className="text-2xl font-bold mb-2 text-primary">
                         Resultado
                     </h2>
                     <p>
                         Valor total ao final:{' '}
-                        <b>
+                        <b data-testid="total-value">
                             R${' '}
                             {result.total.toLocaleString('pt-BR', {
                                 minimumFractionDigits: 2,
@@ -162,7 +165,7 @@ export default function CompoundInterestForm() {
                     </p>
                     <p>
                         Total investido:{' '}
-                        <b>
+                        <b data-testid="total-contributions">
                             R${' '}
                             {result.totalContributions.toLocaleString('pt-BR', {
                                 minimumFractionDigits: 2,
@@ -171,7 +174,7 @@ export default function CompoundInterestForm() {
                     </p>
                     <p>
                         Juros acumulados:{' '}
-                        <b>
+                        <b data-testid="total-interest">
                             R${' '}
                             {result.interest.toLocaleString('pt-BR', {
                                 minimumFractionDigits: 2,

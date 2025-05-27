@@ -57,4 +57,20 @@ describe('calculateFixedIncomeComparator', () => {
         expect(finalB).toBeGreaterThan(0);
         expect(typeof diff).toBe('number');
     });
+
+    it('deve retornar taxa zero para yieldType inválido', () => {
+        // @ts-expect-error
+        const formData: FixedIncomeComparatorFormData = {
+            investmentTypeA: 'CDB',
+            investmentTypeB: 'LCI',
+            yieldTypeA: 'invalido', // tipo inválido, ignorando o erro de tipo
+            yieldTypeB: 'pre',
+            yieldA: 10,
+            yieldB: 10,
+            periodA: 12,
+            periodB: 12,
+        };
+        const result = calculateFixedIncomeComparator(formData);
+        expect(result.finalA).toBeCloseTo(1000, 2); // sem rendimento
+    });
 });

@@ -1,4 +1,3 @@
-// tests/features/emergencyReserve.test.ts
 import { calculateEmergencyReserve } from '@/utils/calculations/emergencyReserve';
 import { EmergencyReserveFormData } from '@/types/emergencyReserve';
 
@@ -46,5 +45,17 @@ describe('calculateEmergencyReserve', () => {
         expect(result.reserveValue).toBe(4500); // 1500 * 3
         expect(result.monthlySaving).toBe(0);
         expect(result.monthsToSave).toBeNull();
+    });
+
+    it('deve usar 6 meses como padrão para jobType desconhecido', () => {
+        // @ts-ignore
+        const formData: EmergencyReserveFormData = {
+            jobType: 'Freelancer', // não está no monthsMap
+            fixedCost: 1000,
+            monthlySalary: 3000,
+            savingPercent: 10,
+        };
+        const result = calculateEmergencyReserve(formData);
+        expect(result.recommendedMonths).toBe(6);
     });
 });

@@ -1,39 +1,43 @@
 import { calculateRetirement } from '@/utils/calculations/retirement';
 import { RetirementFormData } from '@/types/retirement';
 
-describe('calculateRetirement', () => {
+describe('Integração: Simulação de Aposentadoria', () => {
     it('deve atingir a meta de aposentadoria com investimento agressivo', () => {
-        const formData: RetirementFormData = {
-            monthlyIncome: 10000,
-            currentInvestment: 50000,
-            retirementGoal: 1000000,
-            investPercent: 30, // 30% da renda investida
+        const userFormData: RetirementFormData = {
+            monthlyIncome: 12000,
+            currentInvestment: 100000,
+            retirementGoal: 1500000,
+            investPercent: 35, // 35% da renda investida
             currentAge: 30,
             retirementAge: 60,
             annualReturn: 10,
-            monthlyExpense: 5000,
+            monthlyExpense: 6000,
         };
-        const result = calculateRetirement(formData);
 
-        expect(result.reachedGoal).toBe(true);
-        expect(result.futureValue).toBeGreaterThanOrEqual(1000000);
+        const result = calculateRetirement(userFormData);
+
+        expect(result).toHaveProperty('futureValue');
+        expect(result).toHaveProperty('reachedGoal', true);
+        expect(result.futureValue).toBeGreaterThanOrEqual(1500000);
         expect(result.sustainabilityYears).toBeGreaterThan(0);
         expect(result.years).toBe(30);
     });
 
     it('não deve atingir a meta de aposentadoria com investimento baixo', () => {
-        const formData: RetirementFormData = {
-            monthlyIncome: 4000,
-            currentInvestment: 10000,
+        const userFormData: RetirementFormData = {
+            monthlyIncome: 3500,
+            currentInvestment: 5000,
             retirementGoal: 800000,
             investPercent: 5, // 5% da renda investida
             currentAge: 35,
             retirementAge: 65,
             annualReturn: 6,
-            monthlyExpense: 3500,
+            monthlyExpense: 3000,
         };
-        const result = calculateRetirement(formData);
 
+        const result = calculateRetirement(userFormData);
+
+        expect(result).toHaveProperty('futureValue');
         expect(result.reachedGoal).toBe(false);
         expect(result.futureValue).toBeLessThan(800000);
         expect(result.sustainabilityYears).toBeGreaterThan(0);
@@ -41,7 +45,7 @@ describe('calculateRetirement', () => {
     });
 
     it('deve calcular corretamente a sustentabilidade dos recursos', () => {
-        const formData: RetirementFormData = {
+        const userFormData: RetirementFormData = {
             monthlyIncome: 7000,
             currentInvestment: 20000,
             retirementGoal: 500000,
@@ -51,7 +55,8 @@ describe('calculateRetirement', () => {
             annualReturn: 8,
             monthlyExpense: 3000,
         };
-        const result = calculateRetirement(formData);
+
+        const result = calculateRetirement(userFormData);
 
         expect(result.sustainabilityYears).toBe(
             Math.floor(result.futureValue / (3000 * 12))
