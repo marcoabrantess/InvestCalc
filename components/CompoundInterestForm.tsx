@@ -5,7 +5,7 @@ import { compoundInterestSchema } from '@/utils/validation/compoundInterestSchem
 import { calculateCompoundInterest } from '@/utils/calculations/compoundInterest';
 import { CompoundInterestFormData } from '@/types/compoundInterest';
 
-const initialValues: CompoundInterestFormData = {
+const placeholderValues: CompoundInterestFormData = {
     principal: 0,
     monthlyContribution: 0,
     rate: 8,
@@ -13,7 +13,9 @@ const initialValues: CompoundInterestFormData = {
 };
 
 export default function CompoundInterestForm() {
-    const [form, setForm] = useState(initialValues);
+    const [form, setForm] = useState<
+        Partial<Record<keyof CompoundInterestFormData, string | number>>
+    >({});
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [result, setResult] = useState<null | ReturnType<
         typeof calculateCompoundInterest
@@ -30,7 +32,19 @@ export default function CompoundInterestForm() {
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setErrors({});
-        const parsed = compoundInterestSchema.safeParse(form);
+
+        const formData = (
+            Object.keys(placeholderValues) as Array<
+                keyof CompoundInterestFormData
+            >
+        ).reduce((acc, key) => {
+            if (form[key] !== undefined && form[key] !== '') {
+                acc[key] = Number(form[key]);
+            }
+            return acc;
+        }, {} as CompoundInterestFormData);
+
+        const parsed = compoundInterestSchema.safeParse(formData);
         if (!parsed.success) {
             const fieldErrors: Record<string, string> = {};
             parsed.error.errors.forEach((err) => {
@@ -41,7 +55,7 @@ export default function CompoundInterestForm() {
             setResult(null);
             return;
         }
-        setResult(calculateCompoundInterest(form));
+        setResult(calculateCompoundInterest(formData));
     }
 
     return (
@@ -67,10 +81,11 @@ export default function CompoundInterestForm() {
                     <input
                         type="number"
                         name="principal"
-                        value={form.principal}
+                        value={form.principal ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
+                        placeholder={placeholderValues.principal.toString()}
                         required
                     />
                     {errors.principal && (
@@ -83,10 +98,11 @@ export default function CompoundInterestForm() {
                     <input
                         type="number"
                         name="monthlyContribution"
-                        value={form.monthlyContribution}
+                        value={form.monthlyContribution ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
+                        placeholder={placeholderValues.monthlyContribution.toString()}
                         required
                     />
                     {errors.monthlyContribution && (
@@ -109,11 +125,12 @@ export default function CompoundInterestForm() {
                     <input
                         type="number"
                         name="rate"
-                        value={form.rate}
+                        value={form.rate ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
                         step="0.01"
+                        placeholder={placeholderValues.rate.toString()}
                         required
                     />
                     {errors.rate && (
@@ -126,10 +143,11 @@ export default function CompoundInterestForm() {
                     <input
                         type="number"
                         name="period"
-                        value={form.period}
+                        value={form.period ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={1}
+                        placeholder={placeholderValues.period.toString()}
                         required
                     />
                     {errors.period && (

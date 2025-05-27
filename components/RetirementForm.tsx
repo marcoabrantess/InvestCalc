@@ -5,7 +5,7 @@ import { retirementSchema } from '@/utils/validation/retirementSchema';
 import { calculateRetirement } from '@/utils/calculations/retirement';
 import { RetirementFormData } from '@/types/retirement';
 
-const initialValues: RetirementFormData = {
+const placeholderValues: RetirementFormData = {
     monthlyIncome: 5000,
     currentInvestment: 50000,
     retirementGoal: 1000000,
@@ -17,7 +17,9 @@ const initialValues: RetirementFormData = {
 };
 
 export default function RetirementForm() {
-    const [form, setForm] = useState(initialValues);
+    const [form, setForm] = useState<
+        Partial<Record<keyof RetirementFormData, string | number>>
+    >({});
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [result, setResult] = useState<null | ReturnType<
         typeof calculateRetirement
@@ -34,7 +36,17 @@ export default function RetirementForm() {
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setErrors({});
-        const parsed = retirementSchema.safeParse(form);
+
+        const formData = (
+            Object.keys(placeholderValues) as Array<keyof RetirementFormData>
+        ).reduce((acc, key) => {
+            if (form[key] !== undefined && form[key] !== '') {
+                acc[key] = Number(form[key]);
+            }
+            return acc;
+        }, {} as RetirementFormData);
+
+        const parsed = retirementSchema.safeParse(formData);
         if (!parsed.success) {
             const fieldErrors: Record<string, string> = {};
             parsed.error.errors.forEach((err) => {
@@ -45,7 +57,7 @@ export default function RetirementForm() {
             setResult(null);
             return;
         }
-        setResult(calculateRetirement(form));
+        setResult(calculateRetirement(formData));
     }
 
     return (
@@ -72,10 +84,11 @@ export default function RetirementForm() {
                     <input
                         type="number"
                         name="monthlyIncome"
-                        value={form.monthlyIncome}
+                        value={form.monthlyIncome ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
+                        placeholder={placeholderValues.monthlyIncome.toString()}
                         required
                     />
                     {errors.monthlyIncome && (
@@ -88,10 +101,11 @@ export default function RetirementForm() {
                     <input
                         type="number"
                         name="currentInvestment"
-                        value={form.currentInvestment}
+                        value={form.currentInvestment ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
+                        placeholder={placeholderValues.currentInvestment.toString()}
                         required
                     />
                     {errors.currentInvestment && (
@@ -115,10 +129,11 @@ export default function RetirementForm() {
                     <input
                         type="number"
                         name="retirementGoal"
-                        value={form.retirementGoal}
+                        value={form.retirementGoal ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
+                        placeholder={placeholderValues.retirementGoal.toString()}
                         required
                     />
                     {errors.retirementGoal && (
@@ -131,11 +146,12 @@ export default function RetirementForm() {
                     <input
                         type="number"
                         name="investPercent"
-                        value={form.investPercent}
+                        value={form.investPercent ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
                         max={100}
+                        placeholder={placeholderValues.investPercent.toString()}
                         required
                     />
                     {errors.investPercent && (
@@ -157,11 +173,12 @@ export default function RetirementForm() {
                     <input
                         type="number"
                         name="currentAge"
-                        value={form.currentAge}
+                        value={form.currentAge ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
                         max={120}
+                        placeholder={placeholderValues.currentAge.toString()}
                         required
                     />
                     {errors.currentAge && (
@@ -174,11 +191,12 @@ export default function RetirementForm() {
                     <input
                         type="number"
                         name="retirementAge"
-                        value={form.retirementAge}
+                        value={form.retirementAge ?? ''}
                         onChange={handleChange}
                         className="input w-full"
-                        min={form.currentAge + 1}
+                        min={form.currentAge ? Number(form.currentAge) + 1 : 1}
                         max={120}
+                        placeholder={placeholderValues.retirementAge.toString()}
                         required
                     />
                     {errors.retirementAge && (
@@ -202,12 +220,13 @@ export default function RetirementForm() {
                     <input
                         type="number"
                         name="annualReturn"
-                        value={form.annualReturn}
+                        value={form.annualReturn ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
                         max={100}
                         step="0.1"
+                        placeholder={placeholderValues.annualReturn.toString()}
                         required
                     />
                     {errors.annualReturn && (
@@ -220,10 +239,11 @@ export default function RetirementForm() {
                     <input
                         type="number"
                         name="monthlyExpense"
-                        value={form.monthlyExpense}
+                        value={form.monthlyExpense ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
+                        placeholder={placeholderValues.monthlyExpense.toString()}
                         required
                     />
                     {errors.monthlyExpense && (
@@ -265,9 +285,19 @@ export default function RetirementForm() {
                         <p className="text-red-600 font-semibold mt-2">
                             Com os parâmetros atuais, você não atingirá o
                             objetivo de R${' '}
-                            {form.retirementGoal.toLocaleString('pt-BR', {
-                                minimumFractionDigits: 2,
-                            })}
+                            {form.retirementGoal
+                                ? Number(form.retirementGoal).toLocaleString(
+                                      'pt-BR',
+                                      {
+                                          minimumFractionDigits: 2,
+                                      }
+                                  )
+                                : placeholderValues.retirementGoal.toLocaleString(
+                                      'pt-BR',
+                                      {
+                                          minimumFractionDigits: 2,
+                                      }
+                                  )}
                             . Considere aumentar o percentual investido, o tempo
                             de acumulação ou a rentabilidade.
                         </p>

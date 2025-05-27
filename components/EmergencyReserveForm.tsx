@@ -5,7 +5,7 @@ import { emergencyReserveSchema } from '@/utils/validation/emergencyReserveSchem
 import { calculateEmergencyReserve } from '@/utils/calculations/emergencyReserve';
 import { EmergencyReserveFormData } from '@/types/emergencyReserve';
 
-const initialValues: EmergencyReserveFormData = {
+const placeholderValues: EmergencyReserveFormData = {
     jobType: 'CLT',
     fixedCost: 1000,
     monthlySalary: 5000,
@@ -13,7 +13,9 @@ const initialValues: EmergencyReserveFormData = {
 };
 
 export default function EmergencyReserveForm() {
-    const [form, setForm] = useState(initialValues);
+    const [form, setForm] = useState<
+        Partial<Record<keyof EmergencyReserveFormData, string | number>>
+    >({});
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [result, setResult] = useState<null | ReturnType<
         typeof calculateEmergencyReserve
@@ -37,7 +39,25 @@ export default function EmergencyReserveForm() {
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setErrors({});
-        const parsed = emergencyReserveSchema.safeParse(form);
+
+        const formData = (
+            Object.keys(placeholderValues) as Array<
+                keyof EmergencyReserveFormData
+            >
+        ).reduce((acc, key) => {
+            if (form[key] !== undefined && form[key] !== '') {
+                if (key === 'jobType') {
+                    acc[key] = form[key] as EmergencyReserveFormData['jobType'];
+                } else {
+                    acc[key] = Number(
+                        form[key]
+                    ) as EmergencyReserveFormData[typeof key];
+                }
+            }
+            return acc;
+        }, {} as EmergencyReserveFormData);
+
+        const parsed = emergencyReserveSchema.safeParse(formData);
         if (!parsed.success) {
             const fieldErrors: Record<string, string> = {};
             parsed.error.errors.forEach((err) => {
@@ -48,7 +68,7 @@ export default function EmergencyReserveForm() {
             setResult(null);
             return;
         }
-        setResult(calculateEmergencyReserve(form));
+        setResult(calculateEmergencyReserve(formData));
     }
 
     return (
@@ -69,11 +89,12 @@ export default function EmergencyReserveForm() {
                 <div>
                     <select
                         name="jobType"
-                        value={form.jobType}
+                        value={form.jobType ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         required
                     >
+                        <option value="">Selecione o tipo</option>
                         <option value="CLT">CLT</option>
                         <option value="Autônomo">Autônomo</option>
                         <option value="Empresário">Empresário</option>
@@ -92,10 +113,11 @@ export default function EmergencyReserveForm() {
                     <input
                         type="number"
                         name="fixedCost"
-                        value={form.fixedCost}
+                        value={form.fixedCost ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
+                        placeholder={placeholderValues.fixedCost.toString()}
                         required
                     />
                     {errors.fixedCost && (
@@ -117,10 +139,11 @@ export default function EmergencyReserveForm() {
                     <input
                         type="number"
                         name="monthlySalary"
-                        value={form.monthlySalary}
+                        value={form.monthlySalary ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
+                        placeholder={placeholderValues.monthlySalary.toString()}
                         required
                     />
                     {errors.monthlySalary && (
@@ -133,11 +156,12 @@ export default function EmergencyReserveForm() {
                     <input
                         type="number"
                         name="savingPercent"
-                        value={form.savingPercent}
+                        value={form.savingPercent ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
                         max={100}
+                        placeholder={placeholderValues.savingPercent.toString()}
                         required
                     />
                     {errors.savingPercent && (

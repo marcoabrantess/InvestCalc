@@ -5,7 +5,7 @@ import { rentOrBuySchema } from '@/utils/validation/rentOrBuySchema';
 import { calculateRentOrBuy } from '@/utils/calculations/rentOrBuy';
 import { RentOrBuyFormData } from '@/types/rentOrBuy';
 
-const initialValues: RentOrBuyFormData = {
+const placeholderValues: RentOrBuyFormData = {
     propertyValue: 500000,
     rentValue: 2000,
     appreciation: 4,
@@ -18,7 +18,9 @@ const initialValues: RentOrBuyFormData = {
 };
 
 export default function RentOrBuyForm() {
-    const [form, setForm] = useState(initialValues);
+    const [form, setForm] = useState<
+        Partial<Record<keyof RentOrBuyFormData, string | number>>
+    >({});
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [result, setResult] = useState<null | ReturnType<
         typeof calculateRentOrBuy
@@ -35,7 +37,17 @@ export default function RentOrBuyForm() {
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setErrors({});
-        const parsed = rentOrBuySchema.safeParse(form);
+
+        const formData = Object.keys(placeholderValues).reduce((acc, key) => {
+            const typedKey = key as keyof RentOrBuyFormData;
+            acc[typedKey] =
+                form[typedKey] !== undefined && form[typedKey] !== ''
+                    ? (form[typedKey] as number)
+                    : placeholderValues[typedKey];
+            return acc;
+        }, {} as RentOrBuyFormData);
+
+        const parsed = rentOrBuySchema.safeParse(formData);
         if (!parsed.success) {
             const fieldErrors: Record<string, string> = {};
             parsed.error.errors.forEach((err) => {
@@ -46,7 +58,7 @@ export default function RentOrBuyForm() {
             setResult(null);
             return;
         }
-        setResult(calculateRentOrBuy(form));
+        setResult(calculateRentOrBuy(formData));
     }
 
     return (
@@ -68,10 +80,11 @@ export default function RentOrBuyForm() {
                     <input
                         type="number"
                         name="propertyValue"
-                        value={form.propertyValue}
+                        value={form.propertyValue ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
+                        placeholder={placeholderValues.propertyValue.toString()}
                         required
                     />
                     {errors.propertyValue && (
@@ -84,10 +97,11 @@ export default function RentOrBuyForm() {
                     <input
                         type="number"
                         name="rentValue"
-                        value={form.rentValue}
+                        value={form.rentValue ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
+                        placeholder={placeholderValues.rentValue.toString()}
                         required
                     />
                     {errors.rentValue && (
@@ -107,12 +121,13 @@ export default function RentOrBuyForm() {
                     <input
                         type="number"
                         name="appreciation"
-                        value={form.appreciation}
+                        value={form.appreciation ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
                         max={100}
                         step="0.01"
+                        placeholder={placeholderValues.appreciation.toString()}
                         required
                     />
                     {errors.appreciation && (
@@ -125,12 +140,13 @@ export default function RentOrBuyForm() {
                     <input
                         type="number"
                         name="igpm"
-                        value={form.igpm}
+                        value={form.igpm ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
                         max={100}
                         step="0.01"
+                        placeholder={placeholderValues.igpm.toString()}
                         required
                     />
                     {errors.igpm && (
@@ -152,10 +168,11 @@ export default function RentOrBuyForm() {
                     <input
                         type="number"
                         name="downPayment"
-                        value={form.downPayment}
+                        value={form.downPayment ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
+                        placeholder={placeholderValues.downPayment.toString()}
                         required
                     />
                     {errors.downPayment && (
@@ -168,10 +185,11 @@ export default function RentOrBuyForm() {
                     <input
                         type="number"
                         name="financingCosts"
-                        value={form.financingCosts}
+                        value={form.financingCosts ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
+                        placeholder={placeholderValues.financingCosts.toString()}
                         required
                     />
                     {errors.financingCosts && (
@@ -191,10 +209,11 @@ export default function RentOrBuyForm() {
                     <input
                         type="number"
                         name="term"
-                        value={form.term}
+                        value={form.term ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={1}
+                        placeholder={placeholderValues.term.toString()}
                         required
                     />
                     {errors.term && (
@@ -207,12 +226,13 @@ export default function RentOrBuyForm() {
                     <input
                         type="number"
                         name="interestRate"
-                        value={form.interestRate}
+                        value={form.interestRate ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
                         max={100}
                         step="0.01"
+                        placeholder={placeholderValues.interestRate.toString()}
                         required
                     />
                     {errors.interestRate && (
@@ -232,12 +252,13 @@ export default function RentOrBuyForm() {
                     <input
                         type="number"
                         name="investmentReturn"
-                        value={form.investmentReturn}
+                        value={form.investmentReturn ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
                         max={100}
                         step="0.01"
+                        placeholder={placeholderValues.investmentReturn.toString()}
                         required
                     />
                     {errors.investmentReturn && (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { fixedIncomeComparatorSchema } from '@/utils/validation/fixedIncomeComparatorSchema';
 import { calculateFixedIncomeComparator } from '@/utils/calculations/fixedIncomeComparator';
 import {
@@ -8,7 +8,7 @@ import {
     YieldType,
 } from '@/types/fixedIncomeComparator';
 
-const initialValues: FixedIncomeComparatorFormData = {
+const placeholderValues: FixedIncomeComparatorFormData = {
     investmentTypeA: '',
     investmentTypeB: '',
     yieldTypeA: 'pre',
@@ -35,33 +35,138 @@ const investmentTypes = [
     { value: 'outro', label: 'Outro' },
 ];
 
+// Valores base centralizados
+const BASE_CDI = 14.65;
+const BASE_IPCA = 4.5;
+
+// Componente reutilizável para campos de input
+function InputField({
+    name,
+    value,
+    onChange,
+    label,
+    error,
+    type = 'number',
+    min,
+    placeholder,
+    required = true,
+}: {
+    name: keyof FixedIncomeComparatorFormData;
+    value: string | number | undefined;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    label: string;
+    error?: string;
+    type?: string;
+    min?: number;
+    placeholder?: string;
+    required?: boolean;
+}) {
+    return (
+        <div>
+            <label className="font-medium block max-w-xs break-words whitespace-normal">
+                {label}
+            </label>
+            <input
+                type={type}
+                name={name}
+                value={value ?? ''}
+                onChange={onChange}
+                className="input w-full"
+                min={min}
+                placeholder={placeholder}
+                required={required}
+            />
+            {error && <span className="text-red-600 text-sm">{error}</span>}
+        </div>
+    );
+}
+
+// Componente reutilizável para campos de select
+function SelectField({
+    name,
+    value,
+    onChange,
+    label,
+    error,
+    options,
+    required = true,
+}: {
+    name: keyof FixedIncomeComparatorFormData;
+    value: string | undefined;
+    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+    label: string;
+    error?: string;
+    options: { value: string; label: string }[];
+    required?: boolean;
+}) {
+    return (
+        <div>
+            <label className="font-medium block max-w-xs break-words whitespace-normal">
+                {label}
+            </label>
+            <select
+                name={name}
+                value={value ?? ''}
+                onChange={onChange}
+                className="input w-full"
+                required={required}
+            >
+                {options.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                    </option>
+                ))}
+            </select>
+            {error && <span className="text-red-600 text-sm">{error}</span>}
+        </div>
+    );
+}
+
 export default function FixedIncomeComparatorForm() {
-    const [form, setForm] = useState(initialValues);
+    const [form, setForm] = useState<
+        Partial<Record<keyof FixedIncomeComparatorFormData, string | number>>
+    >({});
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [result, setResult] = useState<null | ReturnType<
         typeof calculateFixedIncomeComparator
     >>(null);
 
-    function handleChange(
+    const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    ) {
+    ) => {
         const { name, value } = e.target;
         setForm((prev) => ({
             ...prev,
-            [name]: name.startsWith('yieldType')
-                ? (value as YieldType)
-                : value === ''
-                ? ''
-                : Number.isNaN(Number(value))
-                ? value
-                : Number(value.replace(',', '.')),
+            [name]: value,
         }));
-    }
+    };
 
-    function handleSubmit(e: React.FormEvent) {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setErrors({});
-        const parsed = fixedIncomeComparatorSchema.safeParse(form);
+
+        const formData = (
+            Object.keys(placeholderValues) as Array<
+                keyof FixedIncomeComparatorFormData
+            >
+        ).reduce((acc, key) => {
+            if (form[key] !== undefined && form[key] !== '') {
+                if (key === 'yieldTypeA' || key === 'yieldTypeB') {
+                    acc[key] = form[key] as YieldType;
+                } else if (
+                    key === 'investmentTypeA' ||
+                    key === 'investmentTypeB'
+                ) {
+                    acc[key] = form[key] as string;
+                } else {
+                    acc[key] = Number(form[key]);
+                }
+            }
+
+            return acc;
+        }, {} as FixedIncomeComparatorFormData);
+
+        const parsed = fixedIncomeComparatorSchema.safeParse(formData);
         if (!parsed.success) {
             const fieldErrors: Record<string, string> = {};
             parsed.error.errors.forEach((err) => {
@@ -72,8 +177,53 @@ export default function FixedIncomeComparatorForm() {
             setResult(null);
             return;
         }
-        setResult(calculateFixedIncomeComparator(form));
-    }
+
+        setResult(calculateFixedIncomeComparator(formData));
+    };
+
+    const resultDisplay = useMemo(() => {
+        if (!result) return null;
+
+        return (
+            <div className="mt-8 bg-gray-50 rounded-xl p-6 shadow-inner text-center">
+                <h2 className="text-2xl font-bold mb-2 text-primary">
+                    Resultado
+                </h2>
+                <p>
+                    Investimento A:{' '}
+                    <b>
+                        R${' '}
+                        {result.finalA.toLocaleString('pt-BR', {
+                            minimumFractionDigits: 2,
+                        })}
+                    </b>
+                </p>
+                <p>
+                    Investimento B:{' '}
+                    <b>
+                        R${' '}
+                        {result.finalB.toLocaleString('pt-BR', {
+                            minimumFractionDigits: 2,
+                        })}
+                    </b>
+                </p>
+                <p className="mt-4 text-lg font-semibold">
+                    {result.diff > 0
+                        ? `O investimento A rende R$ ${result.diff.toLocaleString(
+                              'pt-BR',
+                              { minimumFractionDigits: 2 }
+                          )} a mais.`
+                        : result.diff < 0
+                        ? `O investimento B rende R$ ${Math.abs(
+                              result.diff
+                          ).toLocaleString('pt-BR', {
+                              minimumFractionDigits: 2,
+                          })} a mais.`
+                        : 'Ambos rendem o mesmo valor.'}
+                </p>
+            </div>
+        );
+    }, [result]);
 
     return (
         <form
@@ -84,196 +234,84 @@ export default function FixedIncomeComparatorForm() {
                 Comparador de Renda Fixa
             </h2>
             <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-                <div>
-                    <label className="font-medium block max-w-xs break-words whitespace-normal">
-                        Qual é o tipo de investimento?
-                    </label>
-                </div>
-                <div>
-                    <label className="font-medium block max-w-xs break-words whitespace-normal">
-                        Você quer comparar com:
-                    </label>
-                </div>
-                <div>
-                    <select
-                        name="investmentTypeA"
-                        value={form.investmentTypeA}
-                        onChange={handleChange}
-                        className="input w-full"
-                        required
-                    >
-                        {investmentTypes.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                            </option>
-                        ))}
-                    </select>
-                    {errors.investmentTypeA && (
-                        <span className="text-red-600 text-sm">
-                            {errors.investmentTypeA}
-                        </span>
-                    )}
-                </div>
-                <div>
-                    <select
-                        name="investmentTypeB"
-                        value={form.investmentTypeB}
-                        onChange={handleChange}
-                        className="input w-full"
-                        required
-                    >
-                        {investmentTypes.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                            </option>
-                        ))}
-                    </select>
-                    {errors.investmentTypeB && (
-                        <span className="text-red-600 text-sm">
-                            {errors.investmentTypeB}
-                        </span>
-                    )}
-                </div>
+                <SelectField
+                    name="investmentTypeA"
+                    value={form.investmentTypeA as string}
+                    onChange={handleChange}
+                    label="Qual é o tipo de investimento?"
+                    options={investmentTypes}
+                    error={errors.investmentTypeA}
+                />
+                <SelectField
+                    name="investmentTypeB"
+                    value={form.investmentTypeB as string}
+                    onChange={handleChange}
+                    label="Você quer comparar com:"
+                    options={investmentTypes}
+                    error={errors.investmentTypeB}
+                />
 
-                <div>
-                    <label className="font-medium block max-w-xs break-words whitespace-normal">
-                        A rentabilidade está em
-                    </label>
-                </div>
-                <div>
-                    <label className="font-medium block max-w-xs break-words whitespace-normal">
-                        A rentabilidade está em
-                    </label>
-                </div>
-                <div>
-                    <select
-                        name="yieldTypeA"
-                        value={form.yieldTypeA}
-                        onChange={handleChange}
-                        className="input w-full"
-                        required
-                    >
-                        {yieldTypeOptions.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                            </option>
-                        ))}
-                    </select>
-                    {errors.yieldTypeA && (
-                        <span className="text-red-600 text-sm">
-                            {errors.yieldTypeA}
-                        </span>
-                    )}
-                </div>
-                <div>
-                    <select
-                        name="yieldTypeB"
-                        value={form.yieldTypeB}
-                        onChange={handleChange}
-                        className="input w-full"
-                        required
-                    >
-                        {yieldTypeOptions.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                            </option>
-                        ))}
-                    </select>
-                    {errors.yieldTypeB && (
-                        <span className="text-red-600 text-sm">
-                            {errors.yieldTypeB}
-                        </span>
-                    )}
-                </div>
+                <SelectField
+                    name="yieldTypeA"
+                    value={
+                        (form.yieldTypeA as string) ||
+                        placeholderValues.yieldTypeA
+                    }
+                    onChange={handleChange}
+                    label="A rentabilidade está em"
+                    options={yieldTypeOptions}
+                    error={errors.yieldTypeA}
+                />
+                <SelectField
+                    name="yieldTypeB"
+                    value={
+                        (form.yieldTypeB as string) ||
+                        placeholderValues.yieldTypeB
+                    }
+                    onChange={handleChange}
+                    label="A rentabilidade está em"
+                    options={yieldTypeOptions}
+                    error={errors.yieldTypeB}
+                />
 
-                <div>
-                    <label className="font-medium block max-w-xs break-words whitespace-normal">
-                        Rentabilidade
-                    </label>
-                </div>
-                <div>
-                    <label className="font-medium block max-w-xs break-words whitespace-normal">
-                        Rentabilidade
-                    </label>
-                </div>
-                <div>
-                    <input
-                        type="number"
-                        name="yieldA"
-                        value={form.yieldA}
-                        onChange={handleChange}
-                        className="input w-full"
-                        min={0}
-                        required
-                    />
-                    {errors.yieldA && (
-                        <span className="text-red-600 text-sm">
-                            {errors.yieldA}
-                        </span>
-                    )}
-                </div>
-                <div>
-                    <input
-                        type="number"
-                        name="yieldB"
-                        value={form.yieldB}
-                        onChange={handleChange}
-                        className="input w-full"
-                        min={0}
-                        required
-                    />
-                    {errors.yieldB && (
-                        <span className="text-red-600 text-sm">
-                            {errors.yieldB}
-                        </span>
-                    )}
-                </div>
+                <InputField
+                    name="yieldA"
+                    value={form.yieldA}
+                    onChange={handleChange}
+                    label="Rentabilidade"
+                    error={errors.yieldA}
+                    placeholder={placeholderValues.yieldA.toString()}
+                />
+                <InputField
+                    name="yieldB"
+                    value={form.yieldB}
+                    onChange={handleChange}
+                    label="Rentabilidade"
+                    error={errors.yieldB}
+                    placeholder={placeholderValues.yieldB.toString()}
+                />
 
-                <div>
-                    <label className="font-medium block max-w-xs break-words whitespace-normal">
-                        Tempo de investimento (meses)
-                    </label>
-                </div>
-                <div>
-                    <label className="font-medium block max-w-xs break-words whitespace-normal">
-                        Tempo de investimento (meses)
-                    </label>
-                </div>
-                <div>
-                    <input
-                        type="number"
-                        name="periodA"
-                        value={form.periodA}
-                        onChange={handleChange}
-                        className="input w-full"
-                        min={1}
-                        required
-                    />
-                    {errors.periodA && (
-                        <span className="text-red-600 text-sm">
-                            {errors.periodA}
-                        </span>
-                    )}
-                </div>
-                <div>
-                    <input
-                        type="number"
-                        name="periodB"
-                        value={form.periodB}
-                        onChange={handleChange}
-                        className="input w-full"
-                        min={1}
-                        required
-                    />
-                    {errors.periodB && (
-                        <span className="text-red-600 text-sm">
-                            {errors.periodB}
-                        </span>
-                    )}
-                </div>
+                <InputField
+                    name="periodA"
+                    value={form.periodA}
+                    onChange={handleChange}
+                    label="Tempo de investimento (meses)"
+                    error={errors.periodA}
+                    placeholder={placeholderValues.periodA.toString()}
+                    min={1}
+                />
+                <InputField
+                    name="periodB"
+                    value={form.periodB}
+                    onChange={handleChange}
+                    label="Tempo de investimento (meses)"
+                    error={errors.periodB}
+                    placeholder={placeholderValues.periodB.toString()}
+                    min={1}
+                />
             </div>
             <div className="text-xs text-gray-500 mt-2">
-                Valores base utilizados: CDI 14,65% | IPCA 4,5%
+                Valores base utilizados: CDI {BASE_CDI}% | IPCA {BASE_IPCA}%
             </div>
             <button
                 type="submit"
@@ -282,45 +320,7 @@ export default function FixedIncomeComparatorForm() {
                 Calcular
             </button>
 
-            {result && (
-                <div className="mt-8 bg-gray-50 rounded-xl p-6 shadow-inner text-center">
-                    <h2 className="text-2xl font-bold mb-2 text-primary">
-                        Resultado
-                    </h2>
-                    <p>
-                        Investimento A:{' '}
-                        <b>
-                            R${' '}
-                            {result.finalA.toLocaleString('pt-BR', {
-                                minimumFractionDigits: 2,
-                            })}
-                        </b>
-                    </p>
-                    <p>
-                        Investimento B:{' '}
-                        <b>
-                            R${' '}
-                            {result.finalB.toLocaleString('pt-BR', {
-                                minimumFractionDigits: 2,
-                            })}
-                        </b>
-                    </p>
-                    <p className="mt-4 text-lg font-semibold">
-                        {result.diff > 0
-                            ? `O investimento A rende R$ ${result.diff.toLocaleString(
-                                  'pt-BR',
-                                  { minimumFractionDigits: 2 }
-                              )} a mais.`
-                            : result.diff < 0
-                            ? `O investimento B rende R$ ${Math.abs(
-                                  result.diff
-                              ).toLocaleString('pt-BR', {
-                                  minimumFractionDigits: 2,
-                              })} a mais.`
-                            : 'Ambos rendem o mesmo valor.'}
-                    </p>
-                </div>
-            )}
+            {resultDisplay}
         </form>
     );
 }

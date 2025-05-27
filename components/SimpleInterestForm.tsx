@@ -5,14 +5,16 @@ import { simpleInterestSchema } from '@/utils/validation/simpleInterestSchema';
 import { calculateSimpleInterest } from '@/utils/calculations/simpleInterest';
 import { SimpleInterestFormData } from '@/types/simpleInterest';
 
-const initialValues: SimpleInterestFormData = {
+const placeholderValues: SimpleInterestFormData = {
     principal: 1000,
     rate: 6.25,
     period: 12,
 };
 
 export default function SimpleInterestForm() {
-    const [form, setForm] = useState(initialValues);
+    const [form, setForm] = useState<
+        Partial<Record<keyof SimpleInterestFormData, string | number>>
+    >({});
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [result, setResult] = useState<null | ReturnType<
         typeof calculateSimpleInterest
@@ -29,7 +31,19 @@ export default function SimpleInterestForm() {
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setErrors({});
-        const parsed = simpleInterestSchema.safeParse(form);
+
+        const formData = (
+            Object.keys(placeholderValues) as Array<
+                keyof SimpleInterestFormData
+            >
+        ).reduce((acc, key) => {
+            if (form[key] !== undefined && form[key] !== '') {
+                acc[key] = Number(form[key]);
+            }
+            return acc;
+        }, {} as SimpleInterestFormData);
+
+        const parsed = simpleInterestSchema.safeParse(formData);
         if (!parsed.success) {
             const fieldErrors: Record<string, string> = {};
             parsed.error.errors.forEach((err) => {
@@ -40,7 +54,7 @@ export default function SimpleInterestForm() {
             setResult(null);
             return;
         }
-        setResult(calculateSimpleInterest(form));
+        setResult(calculateSimpleInterest(formData));
     }
 
     return (
@@ -64,10 +78,11 @@ export default function SimpleInterestForm() {
                     <input
                         type="number"
                         name="principal"
-                        value={form.principal}
+                        value={form.principal ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
+                        placeholder={placeholderValues.principal.toString()}
                         required
                     />
                     {errors.principal && (
@@ -80,11 +95,12 @@ export default function SimpleInterestForm() {
                     <input
                         type="number"
                         name="rate"
-                        value={form.rate}
+                        value={form.rate ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={0}
                         step="0.01"
+                        placeholder={placeholderValues.rate.toString()}
                         required
                     />
                     {errors.rate && (
@@ -101,10 +117,11 @@ export default function SimpleInterestForm() {
                     <input
                         type="number"
                         name="period"
-                        value={form.period}
+                        value={form.period ?? ''}
                         onChange={handleChange}
                         className="input w-full"
                         min={1}
+                        placeholder={placeholderValues.period.toString()}
                         required
                     />
                     {errors.period && (
