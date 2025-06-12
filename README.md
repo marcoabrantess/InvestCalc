@@ -10,8 +10,8 @@ Plan your financial future with InvestCalc: Simulate and visualize your investme
 *   **TypeScript:** Programming language that adds static typing to JavaScript, improving code quality and maintainability.
 *   **Vercel:** Continuous deployment platform that simplifies deploying and managing Next.js applications.
 *   **GitHub Actions:** Workflow automation platform for creating CI/CD (Continuous Integration/Continuous Deployment) pipelines.
-*   **Styled Components / Tailwind CSS:** (To be defined) Libraries for styling React components, enabling modern and customized interfaces.
-*   **Jest / Testing Library:** (To be defined) Frameworks for unit and integration testing, ensuring code quality and stability.
+*   **Styled Components / Tailwind CSS:** Libraries for styling React components, enabling modern and customized interfaces.
+*   **Jest / Cypress:** Frameworks for unit and integration testing, ensuring code quality and stability.
 
 ## Main Features
 
